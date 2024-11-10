@@ -1,1 +1,1 @@
-"# shoreline_project" 
+# Shoreline Detection Project
