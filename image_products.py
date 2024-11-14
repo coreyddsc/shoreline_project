@@ -7,6 +7,7 @@ from io import BytesIO
 import time
 from getTimexShoreline import *
 from read_jsons import *
+from webcoos_request import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
@@ -219,6 +220,19 @@ class ImageProcessor:
         if self.vidPath and os.path.exists(self.vidPath) and self.vidName.startswith('http'):
             os.remove(self.vidPath)
             print(f"Deleted temporary video file: {self.vidPath}")
+            
+    #######################
+    def create_img_products(self, url):
+        """
+        Create image products from the video URL.
+        """
+        self.download_video(url)
+        self.generate_timex_image()
+        self.generate_brightest_pixel_image()
+        self.generate_timexavg_shoreline()
+        self.clean_up()        
+            
+            
       
      
     ###########################  
@@ -366,9 +380,14 @@ class ImageProcessor:
         plt.tight_layout()
         plt.show()           
   
-if __name__ == "__name__":
+if __name__ == "__main__":
+    start_time = '2024-07-22 00:00:00'
+    end_time = '2024-07-23 00:00:00'
     station_names = ['oakisland_west', 'jennette_north','currituck_hampton_inn']
+    inv = get_inventory(start_time=start_time, end_time=end_time,station=station_names[0])
+    url = inv[0]['data']['properties']['url']
     IP = ImageProcessor(stationName=station_names[0])
+    IP.create_img_products(url)
 
 
 
