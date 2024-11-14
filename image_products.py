@@ -339,6 +339,10 @@ class ImageProcessor:
         num_images = len(self.timexImgs)
         fig, ax = plt.subplots(num_images, 6, figsize=(24, 6 * num_images))
         
+        # If only one image, make sure `ax` is treated as a 2D list
+        if num_images == 1:
+            ax = [ax]
+        
         for i in range(num_images):
             timex = self.timexImgs[i]
             rmb = self.timexRMBs[i]
@@ -348,37 +352,37 @@ class ImageProcessor:
             edges = self.timexEdges[i]
             
             # Display timex image
-            ax[i, 0].imshow(timex)
-            # ax[i, 0].set_title(f"Timex Image: {self.timexLabels[i]}", fontsize=9)
-            # ax[i, 0].axis('off')
+            ax[i][0].imshow(timex)
             
-            # Display red-minus-blue image
             # Ensure rmb is a 2D array (grayscale) for correct colormap application
             if len(rmb.shape) == 3:
                 rmb = rmb[:, :, 0]  # Use only one channel if rmb is 3D
             
-            ax[i, 1].imshow(rmb, cmap=cmap, vmin=0, vmax=1)
-            # ax[i, 1].set_title(f"Red Minus Blue Image: {self.timexLabels[i]}", fontsize=9)
-            # ax[i, 1].axis('off')
+            ax[i][1].imshow(rmb, cmap=cmap, vmin=0, vmax=1)
             
             # Display Highpass filtered image
-            ax[i, 2].imshow(highpass, cmap='gray')
-            # ax[i, 2].set_title(f"Highpass Filter: {self.timexLabels[i]}", fontsize=9)
-            # ax[i, 2].axis('off')
+            ax[i][2].imshow(highpass, cmap='gray')
             
             # Display Otsu thresholded image
-            ax[i, 3].imshow(otsu, cmap=cmap)
+            ax[i][3].imshow(otsu, cmap=cmap)
             
             # Display local Otsu thresholded image
-            ax[i, 4].imshow(local_otsu, cmap=cmap)
-            # ax[i, 4].set_title(f"Local Otsu: {self.timexLabels[i]}", fontsize=9)
-            # ax[i, 4].axis('off')
+            ax[i][4].imshow(local_otsu, cmap=cmap)
             
             # Display edge transformed image
-            ax[i, 5].imshow(edges, cmap='gray')
+            ax[i][5].imshow(edges, cmap='gray')
         
         plt.tight_layout()
-        plt.show()           
+        plt.show()
+        
+    def plot_image_process(self):
+        self.get_timex_image()
+        self.rmb_transform()
+        self.highpass_filter()
+        self.otsu_threshold()
+        self.local_otsu_transform()
+        self.edge_transform()
+        self.plot_images()           
   
 if __name__ == "__main__":
     start_time = '2024-07-22 00:00:00'
