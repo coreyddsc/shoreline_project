@@ -222,7 +222,7 @@ def getTimexShoreline(stationName, imgName):
     stationPath = os.path.join(cwd, stationName + '.config.json')
     if not os.path.exists(stationPath):
         # Try the alternative path if the stationPath doesn't exist
-        stationPath = os.path.join('c:\\Users\\Corey Dearing\\Desktop\\webCOOS\\webcoos_request', stationName + '.config.json')
+        stationPath = os.path.join(f'.\configs\{stationName}.config.json')
     
     print(f"Station path: {stationPath}")
     print(f"Station path: {stationPath}")

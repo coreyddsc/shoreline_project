@@ -11,8 +11,12 @@ import time
 
 # get webcoos_token from the environment variable
 
-webcoos_token = os.getenv('WebCOOS')
-# webcoos_token = "OR DIRECTLY ADD YOUR TOKEN HERE"
+# Perform error handling to ensure the token is available
+if 'WebCOOS' not in os.environ:
+    raise ValueError('WebCOOS token is required. Please set the WebCOOS environment variable.')
+else:
+    webcoos_token = os.getenv('WebCOOS')
+    # webcoos_token = "OR DIRECTLY ADD YOUR TOKEN HERE"
 
 def handle_time(time_str):
     """Convert a string to a datetime object."""
