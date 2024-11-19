@@ -30,7 +30,7 @@ class ShorelineDataProcessor:
     def _get_data_directory(self):
         # Go up one directory and then into transect_jsons/{station_name}
         cwd = os.getcwd()
-        return os.path.join(cwd, '..', 'transect_jsons', self.station_name)
+        return os.path.join(cwd, 'transect_jsons', self.station_name)
 
     def get_station_info(self):
         # Construct the path to the config.json file
@@ -38,7 +38,7 @@ class ShorelineDataProcessor:
 
         # Handle alternative path if the stationPath doesn't exist
         if not os.path.exists(station_path):
-            alt_path = os.path.join('c:\\Users\\Corey Dearing\\Desktop\\webCOOS\\webcoos_request', f'{self.station_name}.config.json')
+            alt_path = os.path.join(f'.\configs\{self.station_name}.config.json')
             if os.path.exists(alt_path):
                 station_path = alt_path
             else:
@@ -93,6 +93,7 @@ class ShorelineDataProcessor:
         data = []
 
         # Iterate through all files in the data directory
+        print(self.data_directory)
         for filename in os.listdir(self.data_directory):
             if filename.endswith(".json"):
                 filepath = os.path.join(self.data_directory, filename)
@@ -109,6 +110,7 @@ class ShorelineDataProcessor:
         self.transects_json_df = pd.DataFrame(data)
         return self.transects_json_df
     
+    #     return self.coords_df
     def get_shoreline_coords(self):
         # Ensure that the main DataFrame is not empty
         if self.transects_json_df.empty:
@@ -118,42 +120,33 @@ class ShorelineDataProcessor:
         if self.orientation is None:
             self.get_station_orientation()
 
-        # Method for orientation 0 (reverse entries due to orientation)
+        # Explode the Shoreline Points to separate rows for each point
+        exploded_df = self.transects_json_df.explode("Shoreline Points")
+
+        # Extract x, y coordinates from the Shoreline Points column
+        exploded_df[['X', 'Y']] = pd.DataFrame(exploded_df['Shoreline Points'].tolist(), index=exploded_df.index)
+
+        # Convert the 'Time Info' to datetime
+        exploded_df['Datetime'] = pd.to_datetime(exploded_df['Time Info'])
+        print(f'Shape of exploded_df: {exploded_df.shape}')
+        print(f'Info: {exploded_df.loc[:, ["Time Info", "X", "Y"]]}')
+        # # Handle orientation-specific logic
         if self.orientation == 0:
-            # Explode the Shoreline Points to separate rows for each point
-            exploded_df = self.transects_json_df.explode("Shoreline Points")
+            # Drop duplicate (Datetime, X) pairs, keeping only the first observation
+            exploded_df = exploded_df.drop_duplicates(subset=['Datetime', 'X'], keep='first')
 
-            # Extract x, y coordinates from the Shoreline Points column
-            exploded_df[['X', 'Y']] = pd.DataFrame(exploded_df['Shoreline Points'].tolist(), index=exploded_df.index)
-
-            # Reverse the order of the entries
-            exploded_df = exploded_df.iloc[::-1].reset_index(drop=True)
-
-            # Convert the 'Time Info' to datetime
-            exploded_df['Datetime'] = pd.to_datetime(exploded_df['Time Info'])
-
-            # Aggregate duplicates by taking the mean of 'X' for each 'Datetime' and 'Y'
-            exploded_df = exploded_df.groupby(['Datetime', 'Y']).agg({'X': 'mean'}).reset_index()
-
-            # Pivot the DataFrame so that y-coordinates become columns
-            self.coords_df = exploded_df.pivot(index='Datetime', columns='Y', values='X')
-        
-        # Default method for orientation 1 or 2 (ocean right or left)
-        elif self.orientation == 1 or self.orientation == 2:
-            # Explode the Shoreline Points to separate rows for each point
-            exploded_df = self.transects_json_df.explode("Shoreline Points")
-
-            # Extract x, y coordinates from the Shoreline Points column
-            exploded_df[['X', 'Y']] = pd.DataFrame(exploded_df['Shoreline Points'].tolist(), index=exploded_df.index)
-
-            # Convert the 'Time Info' to datetime
-            exploded_df['Datetime'] = pd.to_datetime(exploded_df['Time Info'])
-
+            self.coords_df = exploded_df.pivot(index='Datetime', columns='X', values='Y')
+        else:
+            # Drop duplicate (Datetime, X) pairs, keeping only the first observation
+            exploded_df = exploded_df.drop_duplicates(subset=['Datetime', 'Y'], keep='first')
             # Pivot the DataFrame so that y-coordinates become columns
             self.coords_df = exploded_df.pivot(index='Datetime', columns='Y', values='X')
             
+
+        print(f'Shape of coords_df: {self.coords_df.shape}')
+
         return self.coords_df
-    
+
     
 
 

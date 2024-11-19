@@ -11,6 +11,8 @@ class GetShorelineJSONS:
         self.station_name = station_name
         self.date = '/2024/08/08/'
         self.station_url = f'https://stage-ams.srv.axds.co/archive/jsonl/noaa/{station_name}/{self.date}'
+        # get current working directory
+        self.cwd = os.getcwd()
         
     def set_date(self, date):
         # parse the date to the correct format
@@ -35,6 +37,7 @@ class GetShorelineJSONS:
         if not hasattr(self, 'response'):
             self.get_response()
         self.json_refs = re.findall(r'href="([^"]*\.shoreline_otsu\.v1\.timex\.[^"]*)"', self.response.text)
+        self.jsonref2filename()
         
     def get_json(self, json_ref):
         # print(self.station_url + json_ref)
@@ -42,6 +45,45 @@ class GetShorelineJSONS:
         # print response status
         # print(self.json_response.status_code)
         self.json_content = self.json_response.json()
+        
+    def jsonref2filename(self, verbose=False):
+        self.jsonref_filename = {}
+        for ref in self.json_refs:
+            cln = ref.split(self.station_name)[1] # clean the string
+            cln = cln.split('.')[0][:-3]
+            ld = cln.rfind('-') # last dash index
+            cln = cln[:ld] + '_' + cln[ld+1:]
+            cln = self.station_name + cln + '.avg.slVars.json'
+            self.jsonref_filename[ref] = cln
+        # print sample refs
+        if verbose:
+            print(f"First Filename Ref:\n {self.jsonref_filename[self.json_refs[0]]}")    
+        
+    def save_sljson(self, json_ref, verbose=False):
+        # save json with orientation 'records' and lines True
+        # from cwd go to file path transect_jsons\{self.station_name}
+        # create folder if it does not exist
+        folder_path = os.path.join(self.cwd, 'transect_jsons', self.station_name)
+        filename = self.jsonref_filename[json_ref]
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        else:
+            # check if file exists
+            if os.path.exists(os.path.join(folder_path, filename)):
+                if verbose:
+                    print(f"File {filename} already exists")
+                return
+        # save self.json_content to json file with orientation 'records' and lines True
+        with open(os.path.join(folder_path, filename), 'w') as f:
+            json.dump(self.json_content['detected_shoreline'], f)
+        
+        if verbose:
+            print(folder_path)
+            print(json_ref)
+            print(f"file contents: {type(self.json_content)}")
+
+            
+        
         
     def get_shoreline_orientation(self):
         # self.shoreline_orientation = self.json_content['detected_shoreline']['Orientation']
@@ -51,7 +93,8 @@ class GetShorelineJSONS:
     def get_time_info(self):
         self.time_info = self.json_content['detected_shoreline']['Time Info']
         # split on the period and add the Z to the end
-        self.time_info = self.time_info.split('.')[0] + 'Z'
+        self.time_info = self.time_info.split('.')[0]
+        self.json_content['detected_shoreline']['Time Info'] = self.time_info
         
     def get_shoreline_points(self):
         self.shoreline_points = self.json_content['detected_shoreline']['Shoreline Points']
@@ -91,8 +134,10 @@ class GetShorelineJSONS:
             
             for json_ref in self.json_refs:
                 self.get_json(json_ref)
+                # self.save_sljson(json_ref)
                 self.get_shoreline_orientation()
                 self.get_time_info()
+                self.save_sljson(json_ref)
                 self.get_shoreline_points()
                 self.shorelines_df = pd.concat([self.shorelines_df, self.shoreline_points])
 
