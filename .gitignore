@@ -1,4 +1,8 @@
 __pycache__/
 
-images/
+# images/
+images/oakisland_west/average/
+images/oakisland_west/bright/
+images/jennette_north/
+images/currituck_hampton_inn/
 # transect_jsons/
