@@ -5,14 +5,14 @@ import numpy as np
 from datetime import datetime
 import re
 import cv2
-from read_jsons import *
+from tools.read_jsons import *
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 class GetImages:
     def __init__(self, station_name):
         self.station_name = station_name
-        self.image_dir = f'../images/{station_name}/'
+        self.image_dir = f'images/{station_name}/'
         self.image_list = os.listdir(self.image_dir)
         self.image_list.sort()
         
@@ -22,7 +22,7 @@ class GetImages:
     
     def set_image_type(self, image_type):
         self.image_type = image_type
-        self.image_dir = f'../images/{self.station_name}/{image_type}/'
+        self.image_dir = f'images/{self.station_name}/{image_type}/'
         return self.image_dir
     
     # get the head of this directory

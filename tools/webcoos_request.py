@@ -1,5 +1,5 @@
-from genImgProducts import *
-from getTimexShoreline import *
+from tools.genImgProducts import *
+from tools.getTimexShoreline import *
 from datetime import datetime, timedelta
 import requests
 import cv2

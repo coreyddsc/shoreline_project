@@ -5,9 +5,9 @@ import numpy as np
 import requests
 from io import BytesIO
 import time
-from getTimexShoreline import *
-from read_jsons import *
-from webcoos_request import *
+from tools.getTimexShoreline import *
+from tools.read_jsons import *
+from tools.webcoos_request import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
 

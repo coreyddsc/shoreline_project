@@ -470,12 +470,12 @@ class ShorelineTrend:
             axs = [ax] * n_segments
         
         # Load the image
-        avg_image_path = './images/oakisland_west/timex/oakisland_west-2023-12-01-160842Z-timex.jpeg'
+        avg_image_path = './images/oakisland_west/timex/oakisland_west-2023-12-14-140909Z-timex.jpeg'
         image = Image.open(avg_image_path)
 
         # Resize the image to 30% of its original dimensions
         new_size = (int(image.width * 0.3), int(image.height * 0.3))
-        resized_image = image.resize(new_size, Image.ANTIALIAS)
+        resized_image = image.resize(new_size, Image.Resampling.LANCZOS)
 
         # Convert the resized image to a NumPy array
         resized_image_array = np.array(resized_image)
