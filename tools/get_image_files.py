@@ -5,7 +5,11 @@ import numpy as np
 from datetime import datetime
 import re
 import cv2
-from tools.read_jsons import *
+try:
+    from .read_jsons import * # read_jsons.py
+except:
+    from read_jsons import * # read_jsons.py 
+# from read_jsons import *
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -50,7 +54,12 @@ class GetImages:
         return self.image_df
     
     # use index from image_df to get a list of dates in a user defined range
-    def get_date_range(self, start_date, end_date):
+    def get_date_range(self, start_date=None, end_date=None):
+        # if start and end date are not specified, use the first and last date in the image_df
+        if start_date is None:
+            start_date = self.image_df.index[0]
+        if end_date is None:
+            end_date = self.image_df.index[-1]
         self.start_date = start_date
         self.end_date = end_date
         self.date_range = self.image_df.loc[start_date:end_date].index
@@ -101,6 +110,8 @@ class GetImages:
             # Compute the red-minus-blue difference image
             red_minus_blue = red_channel.astype(int) - blue_channel.astype(int)
             blue_minus_red = blue_channel.astype(int) - red_channel.astype(int)
+            # red_minus_blue = red_channel.astype(int) + blue_channel.astype(int)
+            # blue_minus_red = blue_channel.astype(int) + red_channel.astype(int)
             
             # Normalize the red-minus-blue image to the range [0, 255]
             rmb_normalized = np.clip(red_minus_blue, 0, 255).astype(np.uint8)

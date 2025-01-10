@@ -1,6 +1,7 @@
 __pycache__/
 
-# images/
+tasks/
+images/
 images/oakisland_west/average/
 images/oakisland_west/bright/
 images/jennette_north/
